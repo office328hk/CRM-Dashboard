@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search,
   Filter,
@@ -10,7 +10,11 @@ import {
   Plus,
   Calendar,
   TrendingUp,
-  X
+  X,
+  Edit3,
+  Trash2,
+  Save,
+  UserPlus
 } from 'lucide-react';
 
 interface Customer {
@@ -30,117 +34,201 @@ const CustomersPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
-
-  // Mock customer data
-  const customers: Customer[] = [
-    {
-      id: 1,
-      name: 'Alex Johnson',
-      email: 'alex.johnson@example.com',
-      phone: '+1 (555) 123-4567',
-      company: 'Tech Solutions Inc.',
-      status: 'Active',
-      location: 'New York, NY',
-      lastContact: '2023-06-15',
-      dealValue: '$12,500',
-      avatarColor: 'bg-blue-500'
-    },
-    {
-      id: 2,
-      name: 'Maria Garcia',
-      email: 'maria.g@example.com',
-      phone: '+1 (555) 987-6543',
-      company: 'Global Enterprises',
-      status: 'Active',
-      location: 'Los Angeles, CA',
-      lastContact: '2023-06-18',
-      dealValue: '$8,900',
-      avatarColor: 'bg-green-500'
-    },
-    {
-      id: 3,
-      name: 'David Smith',
-      email: 'david.s@example.com',
-      phone: '+1 (555) 456-7890',
-      company: 'Innovate Corp',
-      status: 'Inactive',
-      location: 'Chicago, IL',
-      lastContact: '2023-05-22',
-      dealValue: '$15,200',
-      avatarColor: 'bg-purple-500'
-    },
-    {
-      id: 4,
-      name: 'Sarah Williams',
-      email: 'sarah.w@example.com',
-      phone: '+1 (555) 234-5678',
-      company: 'Future Systems',
-      status: 'Active',
-      location: 'Miami, FL',
-      lastContact: '2023-06-20',
-      dealValue: '$22,300',
-      avatarColor: 'bg-orange-500'
-    },
-    {
-      id: 5,
-      name: 'James Brown',
-      email: 'james.b@example.com',
-      phone: '+1 (555) 876-5432',
-      company: 'Digital Dynamics',
-      status: 'Active',
-      location: 'Seattle, WA',
-      lastContact: '2023-06-10',
-      dealValue: '$9,800',
-      avatarColor: 'bg-pink-500'
-    },
-    {
-      id: 6,
-      name: 'Lisa Anderson',
-      email: 'lisa.a@example.com',
-      phone: '+1 (555) 345-6789',
-      company: 'Creative Minds',
-      status: 'Active',
-      location: 'Boston, MA',
-      lastContact: '2023-06-12',
-      dealValue: '$17,600',
-      avatarColor: 'bg-indigo-500'
-    },
-    {
-      id: 7,
-      name: 'Robert Taylor',
-      email: 'robert.t@example.com',
-      phone: '+1 (555) 789-0123',
-      company: 'Data Systems Ltd.',
-      status: 'Inactive',
-      location: 'Austin, TX',
-      lastContact: '2023-04-30',
-      dealValue: '$11,400',
-      avatarColor: 'bg-teal-500'
-    },
-    {
-      id: 8,
-      name: 'Emily Davis',
-      email: 'emily.d@example.com',
-      phone: '+1 (555) 678-9012',
-      company: 'Design Studio',
-      status: 'Active',
-      location: 'Denver, CO',
-      lastContact: '2023-06-19',
-      dealValue: '$14,700',
-      avatarColor: 'bg-yellow-500'
-    }
-  ];
-
-  const filteredCustomers = customers.filter(customer => {
-    const matchesSearch = 
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.company.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'All' || customer.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [formData, setFormData] = useState<Omit<Customer, 'id' | 'avatarColor'>>({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    status: 'Active',
+    location: '',
+    lastContact: new Date().toISOString().split('T')[0],
+    dealValue: ''
   });
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Mock customer data (in a real app this would come from database)
+  useEffect(() => {
+    const mockCustomers: Customer[] = [
+      {
+        id: 1,
+        name: 'Alex Johnson',
+        email: 'alex.johnson@example.com',
+        phone: '+1 (555) 123-4567',
+        company: 'Tech Solutions Inc.',
+        status: 'Active',
+        location: 'New York, NY',
+        lastContact: '2023-06-15',
+        dealValue: '$12,500',
+        avatarColor: 'bg-blue-500'
+      },
+      {
+        id: 2,
+        name: 'Maria Garcia',
+        email: 'maria.g@example.com',
+        phone: '+1 (555) 987-6543',
+        company: 'Global Enterprises',
+        status: 'Active',
+        location: 'Los Angeles, CA',
+        lastContact: '2023-06-18',
+        dealValue: '$8,900',
+        avatarColor: 'bg-green-500'
+      },
+      {
+        id: 3,
+        name: 'David Smith',
+        email: 'david.s@example.com',
+        phone: '+1 (555) 456-7890',
+        company: 'Innovate Corp',
+        status: 'Inactive',
+        location: 'Chicago, IL',
+        lastContact: '2023-05-22',
+        dealValue: '$15,200',
+        avatarColor: 'bg-purple-500'
+      },
+      {
+        id: 4,
+        name: 'Sarah Williams',
+        email: 'sarah.w@example.com',
+        phone: '+1 (555) 234-5678',
+        company: 'Future Systems',
+        status: 'Active',
+        location: 'Miami, FL',
+        lastContact: '2023-06-20',
+        dealValue: '$22,300',
+        avatarColor: 'bg-orange-500'
+      },
+      {
+        id: 5,
+        name: 'James Brown',
+        email: 'james.b@example.com',
+        phone: '+1 (555) 876-5432',
+        company: 'Digital Dynamics',
+        status: 'Active',
+        location: 'Seattle, WA',
+        lastContact: '2023-06-10',
+        dealValue: '$9,800',
+        avatarColor: 'bg-pink-500'
+      },
+      {
+        id: 6,
+        name: 'Lisa Anderson',
+        email: 'lisa.a@example.com',
+        phone: '+1 (555) 345-6789',
+        company: 'Creative Minds',
+        status: 'Active',
+        location: 'Boston, MA',
+        lastContact: '2023-06-12',
+        dealValue: '$17,600',
+        avatarColor: 'bg-indigo-500'
+      },
+      {
+        id: 7,
+        name: 'Robert Taylor',
+        email: 'robert.t@example.com',
+        phone: '+1 (555) 789-0123',
+        company: 'Data Systems Ltd.',
+        status: 'Inactive',
+        location: 'Austin, TX',
+        lastContact: '2023-04-30',
+        dealValue: '$11,400',
+        avatarColor: 'bg-teal-500'
+      },
+      {
+        id: 8,
+        name: 'Emily Davis',
+        email: 'emily.d@example.com',
+        phone: '+1 (555) 678-9012',
+        company: 'Design Studio',
+        status: 'Active',
+        location: 'Denver, CO',
+        lastContact: '2023-06-19',
+        dealValue: '$14,700',
+        avatarColor: 'bg-yellow-500'
+      }
+    ];
+    
+    setCustomers(mockCustomers);
+    setFilteredCustomers(mockCustomers);
+  }, []);
+
+  // Filter customers based on search and status
+  useEffect(() => {
+    const filtered = customers.filter(customer => {
+      const matchesSearch = 
+        customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.company.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesStatus = statusFilter === 'All' || customer.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+    
+    setFilteredCustomers(filtered);
+  }, [searchTerm, statusFilter, customers]);
+
+  const handleAddCustomer = () => {
+    setIsEditing(false);
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      company: '',
+      status: 'Active',
+      location: '',
+      lastContact: new Date().toISOString().split('T')[0],
+      dealValue: ''
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleEditCustomer = (customer: Customer) => {
+    setEditingCustomer(customer);
+    setFormData({
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      company: customer.company,
+      status: customer.status,
+      location: customer.location,
+      lastContact: customer.lastContact,
+      dealValue: customer.dealValue
+    });
+    setIsEditing(true);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteCustomer = (id: number) => {
+    if (window.confirm('Are you sure you want to delete this customer?')) {
+      setCustomers(customers.filter(customer => customer.id !== id));
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (isEditing && editingCustomer) {
+      // Update existing customer
+      setCustomers(customers.map(customer => 
+        customer.id === editingCustomer.id ? { ...customer, ...formData } : customer
+      ));
+    } else {
+      // Add new customer
+      const newCustomer: Customer = {
+        id: customers.length + 1,
+        ...formData,
+        avatarColor: `bg-${['blue', 'green', 'purple', 'orange', 'pink', 'indigo', 'teal', 'yellow'][Math.floor(Math.random() * 8)]}-500`
+      };
+      setCustomers([...customers, newCustomer]);
+    }
+    
+    setIsModalOpen(false);
+    setEditingCustomer(null);
+  };
 
   const getStatusColor = (status: string) => {
     return status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
@@ -158,7 +246,10 @@ const CustomersPage = () => {
           <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
           <p className="mt-1 text-sm text-gray-500">Manage your customer relationships and interactions</p>
         </div>
-        <button className="mt-4 md:mt-0 flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200">
+        <button 
+          onClick={handleAddCustomer}
+          className="mt-4 md:mt-0 flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
+        >
           <Plus className="w-5 h-5 mr-2" />
           Add Customer
         </button>
@@ -252,11 +343,17 @@ const CustomersPage = () => {
             </div>
             
             <div className="mt-4 flex space-x-2">
-              <button className="flex-1 py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-sm font-medium transition-colors duration-200">
-                View
-              </button>
-              <button className="flex-1 py-2 px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-lg text-sm font-medium transition-colors duration-200">
+              <button 
+                onClick={() => handleEditCustomer(customer)}
+                className="flex-1 py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-sm font-medium transition-colors duration-200"
+              >
                 Edit
+              </button>
+              <button 
+                onClick={() => handleDeleteCustomer(customer.id)}
+                className="flex-1 py-2 px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-lg text-sm font-medium transition-colors duration-200"
+              >
+                Delete
               </button>
             </div>
           </div>
@@ -315,8 +412,18 @@ const CustomersPage = () => {
                     {customer.dealValue}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
-                    <button className="text-gray-600 hover:text-gray-900">View</button>
+                    <button 
+                      onClick={() => handleEditCustomer(customer)}
+                      className="text-blue-600 hover:text-blue-900 mr-3"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteCustomer(customer.id)}
+                      className="text-gray-600 hover:text-gray-900"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -324,6 +431,132 @@ const CustomersPage = () => {
           </table>
         </div>
       </div>
+
+      {/* Customer Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md max-h-screen overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {isEditing ? 'Edit Customer' : 'Add New Customer'}
+                </h3>
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <input
+                    type="text"
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={formData.company}
+                    onChange={(e) => setFormData({...formData, company: e.target.value})}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={formData.status}
+                      onChange={(e) => setFormData({...formData, status: e.target.value as 'Active' | 'Inactive'})}
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Deal Value</label>
+                    <input
+                      type="text"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={formData.dealValue}
+                      onChange={(e) => setFormData({...formData, dealValue: e.target.value})}
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={formData.location}
+                    onChange={(e) => setFormData({...formData, location: e.target.value})}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Contact</label>
+                  <input
+                    type="date"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={formData.lastContact}
+                    onChange={(e) => setFormData({...formData, lastContact: e.target.value})}
+                  />
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {isEditing ? 'Update' : 'Add'} Customer
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

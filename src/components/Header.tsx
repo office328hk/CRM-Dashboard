@@ -1,9 +1,9 @@
 import React from 'react';
 import { 
-  Search,
+  Menu,
   Bell,
-  ChevronDown,
-  Menu
+  User,
+  Settings
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -18,44 +18,37 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, activeTab }) => {
       case 'customers': return 'Customers';
       case 'sales-pipeline': return 'Sales Pipeline';
       case 'calendar': return 'Calendar';
+      case 'sticky-board': return 'Sticky Board';
       case 'settings': return 'Settings';
       default: return 'Dashboard';
     }
   };
 
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-white shadow-sm border-b border-gray-200">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
           <button 
             onClick={toggleSidebar}
-            className="lg:hidden mr-4 text-gray-600 hover:text-gray-900"
+            className="p-2 rounded-lg hover:bg-gray-100 lg:hidden"
           >
             <Menu className="w-6 h-6" />
           </button>
-          <h1 className="text-xl font-semibold text-gray-800">{getActiveTabTitle()}</h1>
+          <h2 className="ml-4 text-xl font-semibold text-gray-900">
+            {getActiveTabTitle()}
+          </h2>
         </div>
         
         <div className="flex items-center space-x-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          
-          <button className="relative p-2 text-gray-600 hover:text-gray-900">
+          <button className="p-2 rounded-lg hover:bg-gray-100 relative">
             <Bell className="w-6 h-6" />
-            <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full"></span>
+            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
-          
-          <div className="flex items-center space-x-2 cursor-pointer">
-            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-              <span className="font-semibold text-gray-700">JD</span>
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+              <User className="w-5 h-5 text-gray-600" />
             </div>
-            <ChevronDown className="w-5 h-5 text-gray-600" />
+            <span className="text-sm font-medium text-gray-700">Admin</span>
           </div>
         </div>
       </div>

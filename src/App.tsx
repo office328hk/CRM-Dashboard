@@ -6,6 +6,7 @@ import CustomersPage from './components/CustomersPage';
 import SalesPipelineContent from './components/SalesPipelineContent';
 import CalendarContent from './components/CalendarContent';
 import SettingsContent from './components/SettingsContent';
+import StickyBoardContent from './components/StickyBoardContent';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -25,6 +26,8 @@ function App() {
         return <SalesPipelineContent />;
       case 'calendar':
         return <CalendarContent />;
+      case 'sticky-board':
+        return <StickyBoardContent />;
       case 'settings':
         return <SettingsContent />;
       default:
